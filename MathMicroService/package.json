@@ -1,0 +1,10 @@
+{
+  "name": "math-micro-service",
+  "version": "0.0.0",
+  "description": "MathMicroService",
+  "main": "app.js",
+  "author": {
+    "name": "pipel",
+    "email": ""
+  }
+}

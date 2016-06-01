@@ -1,0 +1,10 @@
+{
+  "name": "test-client",
+  "version": "0.0.0",
+  "description": "TestClient",
+  "main": "app.js",
+  "author": {
+    "name": "pipel",
+    "email": ""
+  }
+}
