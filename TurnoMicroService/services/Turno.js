@@ -2,10 +2,10 @@
     return {
         tomarTurno: function (idCliente) {
             var fila = filasClient.obtenerFilaDisponible();
-            var cantidadPersonasFila = fila.Turnos.length;
+            var cantidadPersonasFila = fila.turnos.length;
             var TiempoRestante = cantidadPersonasFila * 10;
             var turno = {
-                codigoFila: fila.Id, 
+                codigoFila: fila.id, 
                 Estado : "EnEspera",
                 Numero: cantidadPersonasFila  ,
                 TiempoRestante : TiempoRestante,
@@ -20,7 +20,7 @@
             var turnoACancelar = dbTurno.getTurnoById(idTurno);
             if (turnoACancelar.Estado == "EnEspera") {
                 turnoACancelar.Estado = "Cancelado";
-                dbTurno.Update(turnoACancelar);
+                dbTurno.update(turnoACancelar);
                 return true;
             }
             else {

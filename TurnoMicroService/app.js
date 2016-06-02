@@ -1,4 +1,5 @@
 ﻿var TurnoLogicFactory = require('./services/Turno.js')
+var turnosRepositoryFactory = require('./data/turnoRepository.js')
 
 function turnoPlugin(options) {
     var turnoLogic;
@@ -38,7 +39,7 @@ function turnoPlugin(options) {
         console.log("Iniciando microservicio...");
         var dbTurno = msg.dbTurno;
         var filasClient = msg.filasClient;
-        turnoLogic = new TurnoLogicFactory(db, filasClient);
+        turnoLogic = new TurnoLogicFactory(dbTurno, filasClient);
         respond();
         console.log("Se inició con éxito!");
     }
@@ -51,6 +52,15 @@ function turnoPlugin(options) {
 
 }
 
+var filasClientFactory = function filas() {
+    return {
+        obtenerFilaDisponible: function () {
+            return {id: 1,turnos:5};
+        },
+    }
+}
+
 require('seneca')()
-  .use(turnoPlugin, { dbTurno:null , filasClient: null })
+  .use(turnoPlugin, { dbTurno: new turnosRepositoryFactory() , filasClient: new filasClientFactory() })
    .listen({ type: 'tcp', port: 1223, host: 'localhost', })
+   .act('role:turno,cmd:tomar,idTurno:123', console.log);
