@@ -5,9 +5,9 @@ function turnoPlugin(options) {
     var turnoLogic;
     
     //Operaciones
-    this.add('role:turno,cmd:tomar,param:idCliente', tomarTurno)
-    this.add('role:turno,cmd:cancelar,param:idTurno', cancelarTurno)
-    this.add('role:turno,cmd:consultarPuesto,param:idTurno', consultarPuesto)
+    this.add('role:turno,cmd:tomar', tomarTurno)
+    this.add('role:turno,cmd:cancelar', cancelarTurno)
+    this.add('role:turno,cmd:consultarPuesto', consultarPuesto)
     
     //Wrappers
     this.wrap('role:turno', parseIntegers);
@@ -62,4 +62,5 @@ var filasClientFactory = function filas() {
 
 require('seneca')()
   .use(turnoPlugin, { dbTurno: new turnosRepositoryFactory() , filasClient: new filasClientFactory() })
-   .listen({ type: 'tcp', port: 1223, host: 'localhost', })
+   .listen({ type: 'tcp', port: 1224, host: 'localhost', })
+
