@@ -63,4 +63,3 @@ var filasClientFactory = function filas() {
 require('seneca')()
   .use(turnoPlugin, { dbTurno: new turnosRepositoryFactory() , filasClient: new filasClientFactory() })
    .listen({ type: 'tcp', port: 1223, host: 'localhost', })
-   .act('role:turno,cmd:consultarPuesto,idTurno:asdad', console.log);

@@ -2,7 +2,8 @@
     //http://localhost:3000/api/calculate/sumar?left=2&right=3 
     //http://localhost:3000/api/calculate/multiplicar?left=2&right=3 
     var valid_ops_math = { sumar: 'sum', multiplicar: 'product' }
-    var valid_ops_turno = { tomar: 'tomar', cancelar: 'cancelar', consultarTurno: 'consultarTurno'}
+    //http://localhost:3000/api/turno/tomar?idCliente=2 
+    var valid_ops_turno = { tomar: 'tomar', cancelar: 'cancelar', consultarTurno: 'consultarTurno' }
 
     this.add('role:api,path:calculate', function (msg, respond) {
         this.act('role:math', {
