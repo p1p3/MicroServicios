@@ -37,8 +37,8 @@ function turnoPlugin(options) {
     
     function init(msg, respond) {
         console.log("Iniciando microservicio...");
-        var dbTurno = msg.dbTurno;
-        var filasClient = msg.filasClient;
+        var dbTurno = options.dbTurno;
+        var filasClient = options.filasClient;
         turnoLogic = new TurnoLogicFactory(dbTurno, filasClient);
         respond();
         console.log("Se inició con éxito!");
@@ -56,7 +56,7 @@ var filasClientFactory = function filas() {
     return {
         obtenerFilaDisponible: function () {
             return {id: 1,turnos:5};
-        },
+        }
     }
 }
 
