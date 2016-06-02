@@ -29,7 +29,7 @@
         },
         consultarPuesto: function (idTurno) {
             var turno = dbTurno.getTurnoById(idTurno);
-            return turno;
+            return turno.Numero;
         }
     }
 }

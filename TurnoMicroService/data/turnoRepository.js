@@ -5,15 +5,15 @@
             return turno;
         },
         update: function (turno){
-            //
+            return turno;
         },
         getTurnoById : function (idTurno){
             var turno = {
-                codigoFila: fila.id, 
+                codigoFila: 1, 
                 Estado : "EnEspera",
-                Numero: cantidadPersonasFila  ,
-                TiempoRestante : TiempoRestante,
-                CodigoPago : idCliente,
+                Numero: 5  ,
+                TiempoRestante : 10,
+                CodigoPago : "asdsad",
                 id: "asdad"
             };
 
