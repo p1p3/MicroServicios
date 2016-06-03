@@ -25,7 +25,7 @@ function turnoPlugin(options) {
     }
     
     function cancelarTurno(msg, respond) {
-        turnoLogic.cancelarTurno(msg.idTurno, function (err, ok) {
+        turnoLogic.cancelarTurno(turno.id, function (err, ok) {
             var out = { answer: ok }
             respond(null, out)
         });
@@ -58,14 +58,17 @@ function turnoPlugin(options) {
 var filasClientFactory = function filas() {
     return {
         obtenerFilaDisponible: function () {
-            return { id: 1, turnos: 5 };
+            return { id: 1, turnos: [{ id: 1 }, { id: 2 }, { id: 3 }] };
         }
     }
 }
 
-var seneca = require('seneca')();
+var seneca = require('seneca')().use('entity');
 
 
-require.use(turnoPlugin, { dbTurno: new turnosRepositoryFactory(require) , filasClient: new filasClientFactory() })
+seneca
+    .use(turnoPlugin, { dbTurno: new turnosRepositoryFactory(seneca) , filasClient: new filasClientFactory() })
    .listen({ type: 'tcp', port: 1224, host: 'localhost', })
+   .act('role:turno,cmd:cancelar', console.log)
+
 

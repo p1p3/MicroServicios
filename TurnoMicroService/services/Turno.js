@@ -1,18 +1,18 @@
-﻿var logicaNegocio = function Turno(dbTurno, filasClient, fn) {
+﻿var logicaNegocio = function Turno(dbTurno, filasClient) {
     return {
-        tomarTurno: function (idCliente) {
+        tomarTurno: function (idCliente, fn) {
             var fila = filasClient.obtenerFilaDisponible();
             var cantidadPersonasFila = fila.turnos.length;
             var TiempoRestante = cantidadPersonasFila * 10;
             var turno = {
                 codigoFila: fila.id, 
                 Estado : "EnEspera",
-                Numero: cantidadPersonasFila  ,
+                Numero: cantidadPersonasFila + 1 ,
                 TiempoRestante : TiempoRestante,
                 CodigoPago : idCliente
             }
             
-            turno = dbTurno.create(turno, function (err, Turno) {
+            turno = dbTurno.create(turno, function (err, turno) {
                 fn(err, turno);
             });
         },

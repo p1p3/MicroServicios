@@ -1,12 +1,11 @@
 ﻿var turnosRepository = function (senecaDI){
-    var self = this;
     var seneca = senecaDI;
     return {
         create : function (turno, fn){
-            turno.id = "asdad";
-            var dbTurno = self.seneca.make('turno');
-            
-            dbTurno = self.mergeTurno(turno, dbTurno);
+
+            var dbTurno = seneca.make('turno');
+
+            dbTurno = mergeTurno(turno, dbTurno);
             /*
             dbTurno.codigoFila = turno.codigoFila;
             dbTurno.Estado = turno.Estado;
@@ -20,7 +19,7 @@
             
         },
         update: function (turno,fn){
-            var dbTurno = self.seneca.make('turno');
+            var dbTurno = seneca.make('turno');
 
             dbTurno.load$(turno.id, function (err, dbTurno) {
                 if (!err) {
@@ -34,8 +33,8 @@
             });
         },
         getTurnoById : function (idTurno,fn){
-            var dbTurno = self.seneca.make('turno');
-            dbTurno.load$(turno.id, function (err, dbTurno) {
+            var dbTurno = seneca.make('turno');
+            dbTurno.load$(idTurno, function (err, dbTurno) {
                     fn(err, dbTurno);
             });
         },
