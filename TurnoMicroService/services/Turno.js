@@ -13,8 +13,10 @@
             }
             
             turno = dbTurno.create(turno, function (err, turno) {
+                //lanzar evento turno asignado a la fila con id : fila.id
                 fn(err, turno);
             });
+
         },
         cancelarTurno: function (idTurno, fn) {
             dbTurno.getTurnoById(idTurno, function (err, turnoACancelar) {

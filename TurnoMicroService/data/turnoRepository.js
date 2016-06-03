@@ -6,12 +6,6 @@
             var dbTurno = seneca.make('turno');
 
             dbTurno = mergeTurno(turno, dbTurno);
-            /*
-            dbTurno.codigoFila = turno.codigoFila;
-            dbTurno.Estado = turno.Estado;
-            dbTurno.Numero = turno.Numero;
-            dbTurno.TiempoRestante = turno.TiempoRestante;
-            dbTurno.CodigoPago = turno.CodigoPago;*/
 
             dbTurno.save$(function (err, dbTurno) {
                 fn(err, dbTurno);
@@ -41,7 +35,6 @@
     }
     
     function mergeTurno(turno, dbTurno) {
-        // combine the two options objects
         for (var key in turno) {
             dbTurno[key] = turno[key];
         }

@@ -7,11 +7,7 @@ function turnoPlugin(options) {
     //Operaciones
     this.add('role:turno,cmd:tomar', tomarTurno)
     this.add('role:turno,cmd:cancelar', cancelarTurno)
-    this.add('role:turno,cmd:consultarPuesto', consultarPuesto)
-    
-    //Wrappers
-    this.wrap('role:turno', parseIntegers);
-    
+    this.add('role:turno,cmd:consultarTurno', consultarTurno)
     
     //Inicialización
     this.add({ init: turnoPlugin }, init)
@@ -25,13 +21,13 @@ function turnoPlugin(options) {
     }
     
     function cancelarTurno(msg, respond) {
-        turnoLogic.cancelarTurno(turno.id, function (err, ok) {
+        turnoLogic.cancelarTurno(msg.idTurno, function (err, ok) {
             var out = { answer: ok }
             respond(null, out)
         });
     }
     
-    function consultarPuesto(msg, respond) {
+    function consultarTurno(msg, respond) {
         turnoLogic.consultarPuesto(msg.idTurno, function (err, puesto) {
             var out = { answer: puesto }
             respond(null, out)
@@ -46,15 +42,10 @@ function turnoPlugin(options) {
         respond();
         console.log("Se inició con éxito!");
     }
-    
-    function parseIntegers(msg, respond) {
-        msg.left = Number(msg.left).valueOf()
-        msg.right = Number(msg.right).valueOf()
-        this.prior(msg, respond)
-    }
 
 }
 
+//Mock para el servicio de filas
 var filasClientFactory = function filas() {
     return {
         obtenerFilaDisponible: function () {
@@ -65,10 +56,9 @@ var filasClientFactory = function filas() {
 
 var seneca = require('seneca')().use('entity');
 
-
 seneca
-    .use(turnoPlugin, { dbTurno: new turnosRepositoryFactory(seneca) , filasClient: new filasClientFactory() })
-   .listen({ type: 'tcp', port: 1224, host: 'localhost', })
-   .act('role:turno,cmd:cancelar', console.log)
+.use(turnoPlugin, { dbTurno: new turnosRepositoryFactory(seneca) , filasClient: new filasClientFactory() })
+.listen({ type: 'tcp', port: 1224, host: 'localhost', })
+   
 
 
