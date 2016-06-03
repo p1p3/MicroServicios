@@ -1,4 +1,4 @@
-﻿var logicaNegocio = function Turno(dbTurno, filasClient) {
+﻿var logicaNegocio = function Turno(dbTurno, filasClient, fn) {
     return {
         tomarTurno: function (idCliente) {
             var fila = filasClient.obtenerFilaDisponible();
@@ -11,25 +11,38 @@
                 TiempoRestante : TiempoRestante,
                 CodigoPago : idCliente
             }
-
-            turno = dbTurno.create(turno);
-
-            return turno;
+            
+            turno = dbTurno.create(turno, function (err, Turno) {
+                fn(err, turno);
+            });
         },
-        cancelarTurno: function (idTurno) {
-            var turnoACancelar = dbTurno.getTurnoById(idTurno);
-            if (turnoACancelar.Estado == "EnEspera") {
-                turnoACancelar.Estado = "Cancelado";
-                dbTurno.update(turnoACancelar);
-                return true;
-            }
-            else {
-                return false;
-            }
+        cancelarTurno: function (idTurno, fn) {
+            dbTurno.getTurnoById(idTurno, function (err, turnoACancelar) {
+                if (!err && turnoACancelar) {
+                    if (turnoACancelar.Estado == "EnEspera") {
+                        turnoACancelar.Estado = "Cancelado";
+                        dbTurno.update(turnoACancelar, function (err, turno) {
+                            var ok = !err;
+                            fn(err, ok);
+                        });
+                    }
+                    else {
+                        fn(err, false);
+                    }
+                } else {
+                    fn(err, false);
+                }
+            });
+
         },
-        consultarPuesto: function (idTurno) {
-            var turno = dbTurno.getTurnoById(idTurno);
-            return turno.Numero;
+        consultarPuesto: function (idTurno, fn) {
+            dbTurno.getTurnoById(idTurno, function (err, turno) {
+                if (!err && turno) {
+                    fn(err, turno.Numero);
+                } else {
+                    fn(err, -1);
+                }
+            });
         }
     }
 }

@@ -18,21 +18,24 @@ function turnoPlugin(options) {
     
     
     function tomarTurno(msg, respond) {
-        var result = turnoLogic.tomarTurno(msg.idCliente);
-        var out = { answer: result }
-        respond(null, out)
+        turnoLogic.tomarTurno(msg.idCliente, function (err, turno) {
+            var out = { answer: turno }
+            respond(null, out)
+        });
     }
     
     function cancelarTurno(msg, respond) {
-        var result = turnoLogic.cancelarTurno(msg.idTurno);
-        var out = { answer: result }
-        respond(null, out)
+        turnoLogic.cancelarTurno(msg.idTurno, function (err, ok) {
+            var out = { answer: ok }
+            respond(null, out)
+        });
     }
     
     function consultarPuesto(msg, respond) {
-        var result = turnoLogic.consultarPuesto(msg.idTurno);
-        var out = { answer: result }
-        respond(null, out)
+        turnoLogic.consultarPuesto(msg.idTurno, function (err, puesto) {
+            var out = { answer: puesto }
+            respond(null, out)
+        });
     }
     
     function init(msg, respond) {
@@ -55,12 +58,14 @@ function turnoPlugin(options) {
 var filasClientFactory = function filas() {
     return {
         obtenerFilaDisponible: function () {
-            return {id: 1,turnos:5};
+            return { id: 1, turnos: 5 };
         }
     }
 }
 
-require('seneca')()
-  .use(turnoPlugin, { dbTurno: new turnosRepositoryFactory() , filasClient: new filasClientFactory() })
+var seneca = require('seneca')();
+
+
+require.use(turnoPlugin, { dbTurno: new turnosRepositoryFactory(require) , filasClient: new filasClientFactory() })
    .listen({ type: 'tcp', port: 1224, host: 'localhost', })
 

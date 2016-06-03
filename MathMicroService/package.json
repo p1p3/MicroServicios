@@ -6,5 +6,8 @@
   "author": {
     "name": "pipel",
     "email": ""
+  },
+  "dependencies": {
+    "seneca": "^2.1.0"
   }
 }
