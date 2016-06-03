@@ -1,0 +1,14 @@
+{
+  "name": "fila-micro-servicio",
+  "version": "0.0.0",
+  "description": "FilaMicroServicio",
+  "main": "app.js",
+  "author": {
+    "name": "felipe.jaramillo",
+    "email": ""
+  },
+  "dependencies": {
+    "seneca": "^2.1.0",
+    "seneca-entity": "^0.1.1"
+  }
+}
