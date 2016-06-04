@@ -1,6 +1,7 @@
 ﻿var TurnoLogicFactory = require('./services/Turno.js')
 var turnosRepositoryFactory = require('./data/turnoRepository.js')
 var filasFacadeFactory = require('./facades/filaServiceFacade.js')
+var eventBrokerFactory = require('./facades/eventBrokerFacade.js')
 
 function turnoPlugin(options) {
     var turnoLogic;
@@ -40,7 +41,8 @@ function turnoPlugin(options) {
         console.log("Iniciando microservicio turnos...");
         var dbTurno = options.dbTurno;
         var filasClient = options.filasClient;
-        turnoLogic = new TurnoLogicFactory(dbTurno, filasClient);
+        var eventClient = options.eventClient;
+        turnoLogic = new TurnoLogicFactory(dbTurno, filasClient, eventClient);
         respond();
         console.log("El servicio de turnos se inició con éxito!");
     }
@@ -58,6 +60,6 @@ var filasClientFactory = function filas() {
 var seneca = require('seneca')().use('entity');
 
 seneca
-.use(turnoPlugin, { dbTurno: new turnosRepositoryFactory(seneca) , filasClient: new filasFacadeFactory(seneca) })
+.use(turnoPlugin, { dbTurno: new turnosRepositoryFactory(seneca) , filasClient: new filasFacadeFactory(seneca), eventClient:new eventBrokerFactory() })
 .listen({ type: 'tcp', port: 1224, host: 'localhost', })
 .act('role:turno, cmd:tomar, idCliente:1,idSede:23', console.log)

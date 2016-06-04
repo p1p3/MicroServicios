@@ -2,9 +2,9 @@
 
 function eventPlugin(options) {
     var seneca;
-
-    var events = [{ id: 1, nombre: 'turnoAsignado', subcribers: [], client: null },
-        { id: 2, nombre: 'turnoCancelado' , subcribers: [] , client: null }]
+    
+    var events = [{ id: 1, nombre: 'turnoAsignado', subcribers: [] },
+        { id: 2, nombre: 'turnoCancelado' , subcribers: [] }]
     
     //Operaciones
     this.add('role:eventBroker,cmd:subscribe', subscribe)
@@ -17,7 +17,7 @@ function eventPlugin(options) {
     
     //implementaciones
     function  subscribe(msg, respond) {
-       
+        
         // msg.eventId, msg.responsePattern, msg.comConfig
         var registroOk = false;
         var event = findEventById(msg.eventId);
@@ -26,9 +26,6 @@ function eventPlugin(options) {
             event = event[0];
             var alreadySubscribed = patternSubscribed(event, msg.responsePattern).length > 0;
             if (!alreadySubscribed) {
-                if (!event.client) { 
-                    event.client = createClient(event.comConfig);
-                } 
                 event.subcribers.push({ pattern: msg.responsePattern, comConfig: msg.comConfig })
                 registroOk = true;
             }
@@ -42,10 +39,18 @@ function eventPlugin(options) {
         var evento = findEventById(msg.eventId);
         var eventArgs = msg.eventArgs;
         var result;
+        
+        if (evento.length > 0) {
+            evento = evento[0];
+            evento.subcribers.forEach(function (subscriber) {
+                var msgPattern = subscriber.pattern;
+                msgPattern.eventArgs = msg.eventArgs;
 
-        if (evento) {
-            events.subcribers.forEach(function (subscriber) {
-                subscriber.client.act(pattern, eventArgs);
+                if (!subscriber.client) {
+                    subscriber.client = createClient(subscriber.comConfig);
+                } 
+
+                subscriber.client.act(msgPattern);
             });
         } else {
             result = "El evento no se encuentra registrado";
@@ -71,9 +76,9 @@ function eventPlugin(options) {
             return subscriber.pattern == pattern;
         })
     }
-
+    
     function createClient(comConfig) {
-        require('seneca')().client(comConfig);
+        return require('seneca')().client(comConfig);
     }
 }
 

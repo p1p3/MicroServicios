@@ -9,8 +9,8 @@ function filaPlugin(options) {
     var eventClient;
     var seneca = this;
     
-    var tomaTurnoPattern = 'role:fila,cmd:tomaTurnoEvento';
-    var cancelaTurnoPattern = 'role:fila,cmd:cancelaTurnoEvento';
+    var tomaTurnoPattern = { role: 'fila', cmd: 'tomaTurnoEvento' };
+    var cancelaTurnoPattern = {role: 'fila',cmd: 'cancelaTurnoEvento'};
 
     //Operaciones
     this.add('role:fila,cmd:abrirFila', abrirFila)
@@ -25,36 +25,28 @@ function filaPlugin(options) {
     this.add({ init: filaPlugin }, init)
 
     function  filaDisponible(msg, respond) {
+        //TODO: Traerlo de base de datos
         var fila = { id: 1, turnos: [{ id: 1 }, { id: 2 }, { id: 3 }] };
         respond(null, fila)
     }
 
     function abrirFila(msg, respond) {
-        filasLogic.tomarTurno(msg.idCaja, function (err, caja) {
-            var out = { answer: caja }
-            respond(null, out)
-        });
+          //TODO: crea fila para sede
     }
 
     function siguienteTurno(msg, respond) {
-        filasLogic.cancelarTurno(msg.idTurno, function (err, ok) {
-            var out = { answer: ok }
-            respond(null, out)
-        });
+        //TODO: remover turnod e la fila       
     }
 
     function tomaTurnoEvento(msg, respond) {
-        filasLogic.agregarTurnoFila(msg.idTurno, msg.idCaja, function (err, ok) {
-            var out = { answer: ok }
-            respond(null, out)
-        });
+        //TODO: remover turnod e la fila
+        console.log("evento recibido", msg.eventArgs);
+        respond();
     }
 
     function cancelaTurnoEvento(msg, respond) {
-        filasLogic.cancelarTurnoFila(msg.idTurno, msg.idCaja, function (err, ok) {
-            var out = { answer: ok }
-            respond(null, out)
-        });
+        console.log("evento recibido", msg.eventArgs);
+        respond();
     }
 
     function init(msg, respond) {
@@ -64,7 +56,8 @@ function filaPlugin(options) {
         eventClient = options.eventBrokerClient;
 
         eventClient.subscribeToEvent(1, tomaTurnoPattern,console.log("ok"))
-       
+        eventClient.subscribeToEvent(2, cancelaTurnoPattern, console.log("ok"))
+
         respond();
         console.log("El microservicio de filas se inició con éxito!");
     }
@@ -72,7 +65,7 @@ function filaPlugin(options) {
 
 
 
-
+//TODO: implemetntar logica en capa services
 var seneca = require('seneca')()
 .use('entity')
 .use(filaPlugin, { dbFila: null, eventBrokerClient: new eventBrokerFactory(comConfig)})

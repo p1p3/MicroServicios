@@ -1,14 +1,5 @@
-﻿var logicaNegocio = function Turno(dbTurno, filasClient, seneca) {
-    var senecaClient = seneca;
-
-    function turnoAsignadoEvent(turno) {
-        senecaClient.act({ role: 'evento', cmd: 'tomaTurno', turnoId: turno.id, filaId: turno.codigoFila });
-    }
-
-    function turnoCanceladoEvent(turno) {
-        senecaClient.act({ role: 'evento', cmd: 'cancelaTurno', turnoId: turno.id, filaId: turno.codigoFila });
-    }
-
+﻿var logicaNegocio = function Turno(dbTurno, filasClient, eventClient) {
+    
     var estadosTurno = {
         EnEspera: { id: 1, name: "En espera" } ,
         EnAtencion: { id: 2, name: "En atención" } ,
@@ -30,7 +21,7 @@
                 }
 
                 turno = dbTurno.create(turno, function (err, turno) {
-                   //TODO: turnoAsignadoEvent(turno);
+                    eventClient.emitTurnoAsignadoEvent(turno);
                     fn(err, turno);
                 });
             });
@@ -43,7 +34,7 @@
                         dbTurno.update(turnoACancelar, function (err, turno) {
                             var ok = !err;
                             if (ok) {
-                               //TODO: turnoCanceladoEvent(turno);
+                                eventClient.emitirTurnoCanceladoEvent(turno);
                             }
                             fn(err, ok);
                         });
@@ -57,6 +48,7 @@
             });
         },
         consultarPuesto: function (idTurno, fn) {
+            //TODO: consultarlo de el servicio de filas, y actualizar el turno en bd
             dbTurno.getTurnoById(idTurno, function (err, turno) {
                 if (!err && turno) {
                     fn(err, turno.Numero);
