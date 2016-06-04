@@ -3,29 +3,33 @@
 function eventPlugin(options) {
     var seneca;
 
-    var events = [{ id: 1, port : 123, host: 'localhost',nombre: 'turnoAsignado', subcribers: [], client: null },
-        { id: 2, port : 123, host: 'localhost', nombre: 'turnoCancelado' , subcribers: [] , client: null }]
+    var events = [{ id: 1, nombre: 'turnoAsignado', subcribers: [], client: null },
+        { id: 2, nombre: 'turnoCancelado' , subcribers: [] , client: null }]
     
     //Operaciones
-    this.add('role:event,cmd:subscribe', subscribe)
+    this.add('role:eventBroker,cmd:subscribe', subscribe)
     this.add('role:eventBroker,cmd:emitir', emitirEvento)
     
     
     //Inicialización
     this.add({ init: eventPlugin }, init)
     
+    
+    //implementaciones
     function  subscribe(msg, respond) {
        
-        // msg.eventId, msg.responsePattern
+        // msg.eventId, msg.responsePattern, msg.comConfig
         var registroOk = false;
         var event = findEventById(msg.eventId);
         
-        if (event) {
-            var alreadySubscribed = patternSubscribed(event, pattern);
+        if (event.length == 1) {
+            event = event[0];
+            var alreadySubscribed = patternSubscribed(event, msg.responsePattern).length > 0;
             if (!alreadySubscribed) {
-                var client = seneca.client({ type: 'tcp', port: event.port, host: event.host, });
-                event.client = client;
-                event.subcribers.push({ pattern: msg.responsePattern })
+                if (!event.client) { 
+                    event.client = createClient(event.comConfig);
+                } 
+                event.subcribers.push({ pattern: msg.responsePattern, comConfig: msg.comConfig })
                 registroOk = true;
             }
         }
@@ -58,7 +62,7 @@ function eventPlugin(options) {
     
     function findEventById(id) {
         return events.filter(function (event) {
-            return event.id == msg.eventId;
+            return event.id == id;
         });
     }
     
@@ -67,10 +71,17 @@ function eventPlugin(options) {
             return subscriber.pattern == pattern;
         })
     }
+
+    function createClient(comConfig) {
+        require('seneca')().client(comConfig);
+    }
 }
 
 var seneca = require('seneca')().use('entity');
 
+
 seneca
-.use(filaPlugin, { seneca: seneca })
+.use(eventPlugin, { seneca: seneca })
 .listen({ type: 'tcp', port: 1220, host: 'localhost', })
+
+
