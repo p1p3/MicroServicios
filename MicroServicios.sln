@@ -9,6 +9,8 @@ Project("{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}") = "TurnoMicroService", "TurnoM
 EndProject
 Project("{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}") = "FilaMicroServicio", "FilaMicroServicio\FilaMicroServicio.njsproj", "{3175D849-954E-44D7-801B-A2E3BB0521BF}"
 EndProject
+Project("{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}") = "EventsBroker", "EventsBroker\EventsBroker.njsproj", "{428927C0-288C-458A-99D0-DFDAAD379608}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{3175D849-954E-44D7-801B-A2E3BB0521BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3175D849-954E-44D7-801B-A2E3BB0521BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3175D849-954E-44D7-801B-A2E3BB0521BF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{428927C0-288C-458A-99D0-DFDAAD379608}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{428927C0-288C-458A-99D0-DFDAAD379608}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{428927C0-288C-458A-99D0-DFDAAD379608}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{428927C0-288C-458A-99D0-DFDAAD379608}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
