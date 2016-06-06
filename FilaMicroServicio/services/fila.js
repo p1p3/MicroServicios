@@ -1,27 +1,30 @@
 ﻿var logicaNegocio = function fila(dbFila, eventClient) {
     return {
         filaDisponible: function (idSede, fn) {
-            fn(err, turno);
+            //TODO: Traerlo de base de datos
+         var fila = { id: 1, idCaja: 31, idSede:32, turnos: [{ id: 1 }, { id: 2 }, { id: 3 }] };
+            fn(null, fila);
         },
-        abrirFila: function (c, fn) {
-            existeFilaCaja(idCaja, function (err, existe) {
+        abrirFila: function (caja, fn) {
+            var idCaja = caja.id;
+            var idSede = caja.sede.id;
+            this.existeFilaCaja(idCaja, function (err, existe) {
                 if (!error && !existe) {
                     var caja = null;
                     var error = null;
                     
                     var fila = {
-                        idCaja: 31,
-                        idSede: 32,
+                        idCaja: idCaja,
+                        idSede: idSede,
                         turnos: [{ id: 1 }, { id: 2 }, { id: 3 }]
                     };
 
-                    dbFila.create()
+                    dbFila.create(fila,function(err,fila){
+                      fn(error, fila);
+                    })
                     
-                    fn(error, caja)
-                    //TODO: crearCajaDb
                 } else {
-                    
-                    fn(err, null);
+                                        fn(err, null);
                 }
 
             })
