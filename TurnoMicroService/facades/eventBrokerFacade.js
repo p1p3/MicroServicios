@@ -3,7 +3,7 @@
     var comConfig = _comConfig;
     
     var emitirEvento = function (idEvento,eventArgs) { 
-        client.act({ role: 'eventBroker', cmd: 'emitir', eventArgs: eventArgs, eventId: eventId });
+        client.act({ role: 'eventBroker', cmd: 'emitir', eventArgs: eventArgs, eventId: idEvento });
     }
 
     return {
@@ -18,7 +18,6 @@
             client.act(subscriber, fn)
         }, emitTurnoAsignadoEvent: function (turno) {
 
-            eventId = 1;
             var eventArgs = {
                 turnoId: turno.id , filaId: turno.codigoFila
             }
@@ -27,7 +26,6 @@
            
         }, emitirTurnoCanceladoEvent: function (turno) {
             
-            eventId = 1;
             var eventArgs = {
                 turnoId: turno.id , filaId: turno.codigoFila
             }

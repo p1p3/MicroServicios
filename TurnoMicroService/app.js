@@ -26,7 +26,7 @@ function turnoPlugin(options) {
 
     function tomarTurno(msg, respond) {
         var idClient = msg.idCliente;
-        var idSede =  msg.idSede;
+        var idSede = msg.idSede;
         turnoLogic.tomarTurno(idClient, idSede, function(err, turno) {
             var out = {
                 answer: turno
@@ -73,4 +73,12 @@ seneca
         eventClient: new eventBrokerFactory()
     })
     .listen(comConfig)
-    //.act('role:turno, cmd:tomar, idCliente:1,idSede:sedePrueba', console.log)
+ /*  .act('role:turno, cmd:tomar, idCliente:1,idSede:sedePrueba', function(err, response) {
+        var turno = response.answer;
+        seneca.act({
+            role: 'turno',
+            cmd: 'consultarTurno',
+            idTurno: turno.id,
+            idCaja: turno.codigoFila
+        }, console.log)
+    })*/

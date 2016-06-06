@@ -71,7 +71,6 @@ var logicaNegocio = function fila(filaRepository, eventClient) {
         },
         cancelaTurnoEvento: function(filaId, turnoId, fn) {
             filaRepository.findById(filaId, function(err, fila) {
-                console.log("logica filas");
                 if (!err) {
 
                     fila.turnos = removerTurnoFila(fila.turnos, turnoId);
@@ -82,6 +81,20 @@ var logicaNegocio = function fila(filaRepository, eventClient) {
                 }
                 else {
                     fn(err, fila);
+                }
+            });
+        },
+        puestoEnFila: function (filaId,turnoId,fn) {
+             filaRepository.findById(filaId, function(err, fila) {
+               
+                if (!err && fila) {
+                     console.log(fila);
+                    var puesto = puestoTurno(fila.turnos,turnoId);
+                     
+                     fn(err, puesto);
+                }
+                else {
+                    fn(err, null);
                 }
             });
         }
@@ -98,6 +111,19 @@ var logicaNegocio = function fila(filaRepository, eventClient) {
         }
 
         return filaToReturn;
+    }
+    
+    function  puestoTurno(turnosFila, turnoId) {
+        console.log(turnosFila);
+        for (var i = 0; i < turnosFila.length; i++) {
+            var turno = turnosFila[i];
+             console.log(turno);
+             console.log(turno.idTurno);
+              console.log(turnoId);
+            if (turno.idTurno == turnoId) {
+                return i + 1;
+            }
+        }
     }
 }
 

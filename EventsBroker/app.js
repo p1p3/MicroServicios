@@ -1,6 +1,3 @@
-﻿
-var filaEvents = null;
-
 function eventPlugin(options) {
     var seneca;
 

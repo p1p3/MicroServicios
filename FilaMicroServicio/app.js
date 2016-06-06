@@ -5,8 +5,7 @@ var eventBrokerFactory = require('./facades/eventBrokerFacade.js');
 var comConfig = {
     type: 'tcp',
     port: 1225,
-    host: 'localhost',
-};
+    host: 'localhost',};
 
 var correrPruebas = false;
 var crearFilaPruebas = true;
@@ -21,15 +20,15 @@ function filaPlugin(options) {
     this.add('role:fila,cmd:filaDisponible', filaDisponible)
     this.add('role:fila,cmd:abrirFila', abrirFila)
     this.add('role:fila,cmd:siguienteTurno', siguienteTurno)
-
+    this.add('role:fila,cmd:puestoEnfila', puestoEnFila)
 
     //Eventos
     var tomaTurnoPattern = {
         role: 'fila',
         cmd: 'tomaTurnoEvento'
     };
-    
     this.add(tomaTurnoPattern, tomaTurnoEvento)
+
     var cancelaTurnoPattern = {
         role: 'fila',
         cmd: 'cancelaTurnoEvento'
@@ -41,6 +40,7 @@ function filaPlugin(options) {
         init: filaPlugin
     }, init)
 
+    //Implementaciones
     function filaDisponible(msg, respond) {
         var idSede = msg.idSede;
         filasLogic.filaDisponible(idSede, function(err, fila) {
@@ -71,6 +71,19 @@ function filaPlugin(options) {
             var msg = {
                 ok: noError,
                 result: operationDone
+            }
+            respond(err, msg);
+        });
+    }
+
+    function puestoEnFila(msg, respond) {
+        var filaId = msg.filaId;
+        var turnoId = msg.turnoId;
+        filasLogic.puestoEnFila(filaId, turnoId, function(err, puesto) {
+            var noError = !err
+            var msg = {
+                ok: noError,
+                result: puesto
             }
             respond(err, msg);
         });
@@ -154,7 +167,7 @@ if (crearFilaPruebas || correrPruebas) {
         if (correrPruebas) {
             console.log("------------------------------------ Pruebas ---------------------------------------------------------------- ");
 
-           
+
             var idSede = filaCreada.caja.idSede;
             var idFila = filaCreada.id;
 
