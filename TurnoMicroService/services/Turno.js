@@ -19,6 +19,22 @@ var logicaNegocio = function Turno(turnoRepository, filasClient, eventClient) {
         }
     }
 
+    var getStateName = function(idEstado) {
+        idEstado = Number(idEstado).valueOf()
+        switch (idEstado) {
+            case 1:
+                return estadosTurno.EnEspera.name;
+            case 2:
+                return estadosTurno.EnAtencion.name;
+            case 3:
+                return estadosTurno.Cancelado.name;
+            case 4:
+                return estadosTurno.Finalizado.name;
+            default:
+                return "No existe";
+        }
+    }
+
     return {
         tomarTurno: function(idCliente, idSede, fn) {
             filasClient.obtenerFilaDisponible(idSede, function(err, fila) {
@@ -26,9 +42,10 @@ var logicaNegocio = function Turno(turnoRepository, filasClient, eventClient) {
 
                     var cantidadPersonasFila = fila.turnos.length;
                     var TiempoRestante = cantidadPersonasFila * 10;
+                    var EstadoInicialTurno = cantidadPersonasFila == 0 ? estadosTurno.EnAtencion.id : estadosTurno.EnEspera.id
                     var turno = {
                         codigoFila: fila.id,
-                        Estado: estadosTurno.EnEspera.id,
+                        Estado: EstadoInicialTurno,
                         Numero: cantidadPersonasFila + 1,
                         TiempoRestante: TiempoRestante,
                         CodigoPago: idCliente
@@ -91,6 +108,51 @@ var logicaNegocio = function Turno(turnoRepository, filasClient, eventClient) {
                     fn("turno no encontrado", -1);
                 }
             });
+        },
+        setEnAtencion: function(idTurno, fn) {
+            turnoRepository.getTurnoById(idTurno, function(err, turno) {
+                console.log("set en action inner", turno);
+                if (!err && turno) {
+                    turno.Estado = estadosTurno.EnAtencion.id
+                    turnoRepository.update(turno, function(err, turno) {
+                        console.log("set en action inner update", turno);
+                        if (fn) fn(err, turno);
+                    })
+                }
+                else {
+                    if (fn) fn("turno no encontrado", null);
+                }
+            });
+        },
+        finalizarTurno: function(idTurno, fn) {
+            turnoRepository.getTurnoById(idTurno, function(err, turno) {
+                if (!err && turno) {
+                    turno.Estado = estadosTurno.Finalizado.id
+                    turnoRepository.update(turno, function(err, turno) {
+                      if (fn)  fn(err, true);
+                    })
+                }
+                else {
+                    if (fn) fn("turno no encontrado", null);
+                }
+            });
+        },
+        estadoTurno: function(idTurno, fn) {
+            turnoRepository.getTurnoById(idTurno, function(err, turno) {
+                if (!err && turno) {
+                    var nombre = getStateName(turno.Estado);
+                    if (fn) fn(err, nombre);
+                }
+                else {
+                    if (fn) fn("turno no encontrado", null);
+                }
+            });
+        },
+        siguienteTurnoEvento: function(siguienteTurno, turnoAnterior, fn) {
+            this.finalizarTurno(turnoAnterior.turnoId);
+            this.setEnAtencion(siguienteTurno.turnoId, function(err, turno) {
+                fn(err, !err);
+            })
         }
     }
 }

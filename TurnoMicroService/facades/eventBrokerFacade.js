@@ -1,7 +1,6 @@
-﻿var eventBrokerClientFactory = function eventBroker(_comConfig) {
-    var client = require('seneca')().client({ type: 'tcp', port: 1220, host: 'localhost', });
-    var comConfig = _comConfig;
-    
+var eventBrokerClientFactory = function eventBroker(comConfig) {
+    var client = require('seneca')().use('entity').client({ type: 'tcp', port: 1220, host: 'localhost', });
+
     var emitirEvento = function (idEvento,eventArgs) { 
         client.act({ role: 'eventBroker', cmd: 'emitir', eventArgs: eventArgs, eventId: idEvento });
     }

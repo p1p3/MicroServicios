@@ -1,13 +1,15 @@
 module.exports = function api(options) {
 
 
-    //http://localhost:3000/api/turno/tomar?idCliente=asd&idSede=asd
-    //http://localhost:3000/api/turno/consultarTurno?idTurno=b8zrvd
-    //http://localhost:3000/api/turno/cancelar?idTurno=b8zrv
+    //https://microservicios-p1p3.c9users.io/api/turno/tomar?idCliente=asd&idSede=asd
+    //https://microservicios-p1p3.c9users.io/api/turno/consultarTurno?idTurno=b8zrvd
+    //https://microservicios-p1p3.c9users.io/api/turno/cancelar?idTurno=b8zrv
+    //https://microservicios-p1p3.c9users.io/api/turno/consultarEstadoTurno?idTurno=b8zrv
     var valid_ops_turno = {
         tomar: 'tomar',
         cancelar: 'cancelar',
-        consultarTurno: 'consultarTurno'
+        consultarTurno: 'consultarTurno',
+        consultarEstadoTurno : 'consultarEstadoTurno'
     }
 
     //https://microservicios-p1p3.c9users.io/api/fila/siguiente?filaId=asd

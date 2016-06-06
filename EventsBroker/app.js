@@ -9,6 +9,10 @@ function eventPlugin(options) {
         id: 2,
         nombre: 'turnoCancelado',
         subcribers: []
+    }, {
+        id: 3,
+        nombre: 'siguienteTurno',
+        subcribers: []
     }]
 
     //Operaciones
@@ -29,6 +33,7 @@ function eventPlugin(options) {
         var registroOk = false;
         var event = findEventById(msg.eventId);
 
+
         if (event.length == 1) {
             event = event[0];
             var alreadySubscribed = patternSubscribed(event, msg.responsePattern).length > 0;
@@ -41,6 +46,7 @@ function eventPlugin(options) {
             }
         }
 
+
         var out = {
             answer: registroOk
         }
@@ -52,16 +58,23 @@ function eventPlugin(options) {
         var eventArgs = msg.eventArgs;
         var result;
 
+
+        console.log("inicio emision evento", evento);
+        console.log("Datos", eventArgs);
+
         if (evento.length > 0) {
             evento = evento[0];
             evento.subcribers.forEach(function(subscriber) {
                 var msgPattern = subscriber.pattern;
-                msgPattern.eventArgs = msg.eventArgs;
+                msgPattern.eventArgs = eventArgs;
+
+                console.log("datos cliente ", subscriber.comConfig);
 
                 if (!subscriber.client) {
                     subscriber.client = createClient(subscriber.comConfig);
                 }
 
+                console.log("datos emision ", msgPattern);
                 subscriber.client.act(msgPattern);
             });
 
@@ -101,7 +114,7 @@ function eventPlugin(options) {
     }
 
     function createClient(comConfig) {
-        return require('seneca')().client(comConfig);
+        return require('seneca')().use('entity').client(comConfig);
     }
 }
 

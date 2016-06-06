@@ -38,18 +38,21 @@ var logicaNegocio = function fila(filaRepository, eventClient) {
         },
         siguienteTurno: function(idFila, fn) {
             filaRepository.findById(idFila, function(err, fila) {
+                var turnoFinalizado;
+                var siguienteTurno;
                 if (fila.turnos.length > 0) {
-                    fila.turnos.shift();
-                    //TODO: lanzar evento siguiente turno
+                    turnoFinalizado = fila.turnos.shift();
                 }
 
                 var ok = !err;
                 fn(err, ok);
                 if (fila.turnos.length > 0) {
-                    var siguienteTurno = fila.turnos[0];
-                    //TODO: lanzar evento siguiente turno
+                    siguienteTurno = fila.turnos[0];
                 }
 
+
+
+                eventClient.emitirSiguienteTurno(siguienteTurno, turnoFinalizado);
             });
         },
         tomaTurnoEvento: function(filaId, turnoId, fn) {
@@ -84,14 +87,14 @@ var logicaNegocio = function fila(filaRepository, eventClient) {
                 }
             });
         },
-        puestoEnFila: function (filaId,turnoId,fn) {
-             filaRepository.findById(filaId, function(err, fila) {
-               
+        puestoEnFila: function(filaId, turnoId, fn) {
+            filaRepository.findById(filaId, function(err, fila) {
+
                 if (!err && fila) {
-                     console.log(fila);
-                    var puesto = puestoTurno(fila.turnos,turnoId);
-                     
-                     fn(err, puesto);
+                    console.log(fila);
+                    var puesto = puestoTurno(fila.turnos, turnoId);
+
+                    fn(err, puesto);
                 }
                 else {
                     fn(err, null);
@@ -100,7 +103,7 @@ var logicaNegocio = function fila(filaRepository, eventClient) {
         }
     }
 
-    function  removerTurnoFila(turnosFila, turnoId) {
+    function removerTurnoFila(turnosFila, turnoId) {
         var filaToReturn = fila;
 
         for (var i = 0; i < turnosFila.length; i++) {
@@ -112,14 +115,10 @@ var logicaNegocio = function fila(filaRepository, eventClient) {
 
         return filaToReturn;
     }
-    
-    function  puestoTurno(turnosFila, turnoId) {
-        console.log(turnosFila);
+
+    function puestoTurno(turnosFila, turnoId) {
         for (var i = 0; i < turnosFila.length; i++) {
             var turno = turnosFila[i];
-             console.log(turno);
-             console.log(turno.idTurno);
-              console.log(turnoId);
             if (turno.idTurno == turnoId) {
                 return i + 1;
             }

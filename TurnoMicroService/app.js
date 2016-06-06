@@ -16,8 +16,14 @@ function turnoPlugin(options) {
     this.add('role:turno,cmd:tomar', tomarTurno)
     this.add('role:turno,cmd:cancelar', cancelarTurno)
     this.add('role:turno,cmd:consultarTurno', consultarTurno)
+    this.add('role:turno,cmd:consultarEstadoTurno', consultarEstadoTurno)
 
-    //Eventos
+
+    var siguienteTurnoPattern = {
+        role: 'turno',
+        cmd: 'tomaTurnoEvento'
+    };
+    this.add(siguienteTurnoPattern, siguienteTurnoEvento)
 
     //Inicialización
     this.add({
@@ -53,12 +59,46 @@ function turnoPlugin(options) {
         });
     }
 
+
+    function consultarEstadoTurno(msg, respond) {
+        var turnoId = msg.idTurno;
+        turnoLogic.estadoTurno(turnoId, function(err, estado) {
+            var out = {
+                answer: estado
+            }
+            respond(err, out)
+        });
+    }
+
+    function siguienteTurnoEvento(msg, respond) {
+        console.log("evento recibido siguienteTurno", msg.eventArgs);
+        
+        var eventArgs = msg.eventArgs;
+        var siguienteTurno = eventArgs.siguienteTurno;
+        var turnoFinalizado = eventArgs.turnoFinalizado;
+
+        turnoLogic.siguienteTurnoEvento(siguienteTurno,turnoFinalizado, function(err, turnoSiguiente) {
+            var out = {
+                answer: turnoSiguiente
+            }
+            
+            console.log("antes de responder ",out);
+            respond(err, out)
+        });
+    }
+
     function init(msg, respond) {
         console.log("Iniciando microservicio turnos...");
         var dbTurno = options.dbTurno;
         var filasClient = options.filasClient;
         var eventClient = options.eventClient;
+
+        eventClient.subscribeToEvent(3, siguienteTurnoPattern, console.log("Subscibiendo a evento de siguienteTurno"))
+
         turnoLogic = new TurnoLogicFactory(dbTurno, filasClient, eventClient);
+
+
+
         respond();
         console.log("El servicio de turnos se inició con éxito!");
     }
@@ -70,15 +110,6 @@ seneca
     .use(turnoPlugin, {
         dbTurno: new turnosRepositoryFactory(),
         filasClient: new filasFacadeFactory(seneca),
-        eventClient: new eventBrokerFactory()
+        eventClient: new eventBrokerFactory(comConfig)
     })
     .listen(comConfig)
- /*  .act('role:turno, cmd:tomar, idCliente:1,idSede:sedePrueba', function(err, response) {
-        var turno = response.answer;
-        seneca.act({
-            role: 'turno',
-            cmd: 'consultarTurno',
-            idTurno: turno.id,
-            idCaja: turno.codigoFila
-        }, console.log)
-    })*/
