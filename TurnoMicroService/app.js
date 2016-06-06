@@ -21,7 +21,7 @@ function turnoPlugin(options) {
 
     var siguienteTurnoPattern = {
         role: 'turno',
-        cmd: 'tomaTurnoEvento'
+        cmd: 'siguienteTurnoEvento'
     };
     this.add(siguienteTurnoPattern, siguienteTurnoEvento)
 
