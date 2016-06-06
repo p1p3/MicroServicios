@@ -1,114 +1,223 @@
-﻿var filaLogicFactory = require('./services/fila.js')
-//var filasRepositoryFactory = require('./data/turnoRepository.js')
-var comConfig = { type: 'tcp', port: 1225, host: 'localhost', };
-var eventBrokerFactory = require('./facades/eventBrokerFacade.js')
+var filaLogicFactory = require('./services/fila.js');
+var filasRepositoryFactory = require('./data/filaRepository.js');
+var eventBrokerFactory = require('./facades/eventBrokerFacade.js');
+
+var comConfig = {
+    type: 'tcp',
+    port: 1225,
+    host: 'localhost',
+};
+
+var correrPruebas = false;
+var crearFilaPruebas = true;
+
 
 function filaPlugin(options) {
     var filasLogic;
-    var comConfig;
     var eventClient;
-    var seneca = this;
-    
-    var tomaTurnoPattern = { role: 'fila', cmd: 'tomaTurnoEvento' };
-    var cancelaTurnoPattern = { role: 'fila', cmd: 'cancelaTurnoEvento' };
-    
+
+
     //Operaciones
+    this.add('role:fila,cmd:filaDisponible', filaDisponible)
     this.add('role:fila,cmd:abrirFila', abrirFila)
     this.add('role:fila,cmd:siguienteTurno', siguienteTurno)
-    this.add('role:fila,cmd:filaDisponible', filaDisponible)
-    
+
+
     //Eventos
+    var tomaTurnoPattern = {
+        role: 'fila',
+        cmd: 'tomaTurnoEvento'
+    };
+    
     this.add(tomaTurnoPattern, tomaTurnoEvento)
+    var cancelaTurnoPattern = {
+        role: 'fila',
+        cmd: 'cancelaTurnoEvento'
+    };
     this.add(cancelaTurnoPattern, cancelaTurnoEvento)
-    
+
     //Inicialización
-    this.add({ init: filaPlugin }, init)
-    
-    function  filaDisponible(msg, respond) {
-        //TODO: Traerlo de base de datos
-        var fila = { id: 1, idCaja: 31, turnos: [{ id: 1 }, { id: 2 }, { id: 3 }] };
-        respond(null, fila)
-    }
-    
-    function abrirFila(msg, respond) {
-        var cajaId = msg.cajaId;
-        filasLogic.abrirFila(cajaId, function (err, fila) {
-            var ok = !err
-            var msg = { ok: ok, response: fila }
-            respond(null, msg);
+    this.add({
+        init: filaPlugin
+    }, init)
+
+    function filaDisponible(msg, respond) {
+        var idSede = msg.idSede;
+        filasLogic.filaDisponible(idSede, function(err, fila) {
+            respond(err, fila);
         });
     }
-    
+
+    function abrirFila(msg, respond) {
+        var caja = {
+            idSede: msg.idSede,
+            idCaja: msg.idCaja
+        };
+
+        filasLogic.abrirFila(caja, function(err, fila) {
+            var ok = !err
+            var msg = {
+                ok: ok,
+                result: fila
+            }
+            respond(err, msg);
+        });
+    }
+
     function siguienteTurno(msg, respond) {
         var filaId = msg.filaId;
-        filasLogic.siguienteTurno(filaId, function (err, operationDone) {
+        filasLogic.siguienteTurno(filaId, function(err, operationDone) {
             var noError = !err
-            var msg = { ok: noError, response: operationDone }
-            respond(null, msg);
+            var msg = {
+                ok: noError,
+                result: operationDone
+            }
+            respond(err, msg);
         });
     }
-    
+
     function tomaTurnoEvento(msg, respond) {
-        console.log("evento recibido", msg.eventArgs);
+        console.log("evento recibido tomaTurno", msg.eventArgs);
 
         var eventArgs = msg.eventArgs;
         var idFila = eventArgs.filaId;
         var idTurno = eventArgs.turnoId;
-        
-        filasLogic.tomaTurnoEvento(idFila, idTurno, function (err, operationDone) {
-            
+
+        filasLogic.tomaTurnoEvento(idFila, idTurno, function(err, operationDone) {
+
             var noError = !err
-            var msg = { ok: noError, response: operationDone }
+            var msg = {
+                ok: noError,
+                result: operationDone
+            }
             respond(null, msg);
-            
-            respond();
         });
     }
-    
+
     function cancelaTurnoEvento(msg, respond) {
-        console.log("evento recibido", msg.eventArgs);
+        console.log("evento recibido cancelaTurno", msg.eventArgs);
 
         var eventArgs = msg.eventArgs;
         var idFila = eventArgs.filaId;
         var idTurno = eventArgs.turnoId;
-        
-        filasLogic.tomaTurnoEvento(idFila, idTurno, function (err, operationDone) {
-            
+
+        filasLogic.cancelaTurnoEvento(idFila, idTurno, function(err, operationDone) {
+
             var noError = !err
-            var msg = { ok: noError, response: operationDone }
+            var msg = {
+                ok: noError,
+                result: operationDone
+            }
             respond(null, msg);
-            
-            respond();
         });
 
     }
-    
+
     function init(msg, respond) {
         console.log("Iniciando microservicio filas...");
-        
+
         var dbFila = options.dbFila;
         eventClient = options.eventBrokerClient;
-        
+
         filasLogic = new filaLogicFactory(dbFila, eventClient);
-        
-        eventClient.subscribeToEvent(1, tomaTurnoPattern, console.log("ok"))
-        eventClient.subscribeToEvent(2, cancelaTurnoPattern, console.log("ok"))
-        
+
+        eventClient.subscribeToEvent(1, tomaTurnoPattern, console.log("Subscibiendo a evento de tomaTurno"))
+        eventClient.subscribeToEvent(2, cancelaTurnoPattern, console.log("Subscibiendo a evento de cancelaTurno"))
+
         respond();
         console.log("El microservicio de filas se inició con éxito!");
     }
 }
 
 
+var seneca = require('seneca')().use('entity')
 
-//TODO: implemetntar logica en capa services
-var seneca = require('seneca')()
-.use('entity')
-.use(filaPlugin, { dbFila: null, eventBrokerClient: new eventBrokerFactory(comConfig) })
-.listen(comConfig)
-
-
-
-
+seneca
+    .use(filaPlugin, {
+        dbFila: new filasRepositoryFactory(seneca),
+        eventBrokerClient: new eventBrokerFactory(comConfig)
+    })
+    .listen(comConfig)
 
 
+//Llenado de base de datos    
+if (crearFilaPruebas || correrPruebas) {
+    seneca.act({
+        role: 'fila',
+        cmd: 'abrirFila',
+        idSede: 'sedePrueba',
+        idCaja: 'cajaPruebas'
+    }, function(err, response) {
+        var filaCreada = response.result;
+        console.log("Se creo la fila con exito ", filaCreada);
+
+        if (correrPruebas) {
+            console.log("------------------------------------ Pruebas ---------------------------------------------------------------- ");
+
+           
+            var idSede = filaCreada.caja.idSede;
+            var idFila = filaCreada.id;
+
+            console.log("---- Prueba operacion filaDisponible ---- ");
+
+            seneca.act({
+                role: 'fila',
+                cmd: 'filaDisponible',
+                idSede: idSede
+            }, function(err, response) {
+                logPruebas(err, response);
+
+                console.log("---- Prueba operacion TomaTurnoEvent ---- ");
+
+                seneca.act({
+                    role: 'fila',
+                    cmd: 'tomaTurnoEvento',
+                    eventArgs: {
+                        filaId: idFila,
+                        turnoId: 'primerTurnoPrueba'
+                    }
+                }, function(err, response) {
+                    logPruebas(err, response);
+
+                    console.log("---- Prueba operacion TomaTurnoEvent DOS ---- ");
+
+                    seneca.act({
+                        role: 'fila',
+                        cmd: 'tomaTurnoEvento',
+                        eventArgs: {
+                            filaId: idFila,
+                            turnoId: 'SegundoTurnoPrueba'
+                        }
+                    }, function(err, response) {
+                        logPruebas(err, response);
+
+                        console.log("---- Prueba operacion cancelaTurnoEvento ---- ");
+                        seneca.act({
+                            role: 'fila',
+                            cmd: 'cancelaTurnoEvento',
+                            eventArgs: {
+                                filaId: idFila,
+                                turnoId: 'primerTurnoPrueba'
+                            }
+                        }, function(err, response) {
+                            logPruebas(err, response);
+                        });
+
+                    });
+
+                })
+            })
+
+        }
+
+    })
+
+    var logPruebas = function(err, resultado) {
+        if (err) {
+            console.log("Sucedio un error ", err);
+        }
+        else {
+            console.log("La prueba se corrio con exito ", resultado);
+        }
+    }
+}

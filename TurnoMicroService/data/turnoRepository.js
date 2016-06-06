@@ -1,9 +1,10 @@
-﻿var turnosRepository = function (senecaDI){
-    var seneca = senecaDI;
+var turnosRepository = function (){
+    var dataSource = require('seneca')().use('entity');
+    
     return {
         create : function (turno, fn){
 
-            var dbTurno = seneca.make('turno');
+            var dbTurno = dataSource.make('turno');
 
             dbTurno = mergeTurno(turno, dbTurno);
 
@@ -13,7 +14,7 @@
             
         },
         update: function (turno,fn){
-            var dbTurno = seneca.make('turno');
+            var dbTurno = dataSource.make('turno');
 
             dbTurno.load$(turno.id, function (err, dbTurno) {
                 if (!err) {
@@ -27,7 +28,7 @@
             });
         },
         getTurnoById : function (idTurno,fn){
-            var dbTurno = seneca.make('turno');
+            var dbTurno = dataSource.make('turno');
             dbTurno.load$(idTurno, function (err, dbTurno) {
                     fn(err, dbTurno);
             });

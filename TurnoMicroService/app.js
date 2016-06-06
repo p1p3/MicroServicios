@@ -1,7 +1,13 @@
-﻿var TurnoLogicFactory = require('./services/Turno.js')
+var TurnoLogicFactory = require('./services/Turno.js')
 var turnosRepositoryFactory = require('./data/turnoRepository.js')
 var filasFacadeFactory = require('./facades/filaServiceFacade.js')
 var eventBrokerFactory = require('./facades/eventBrokerFacade.js')
+
+var comConfig = {
+    type: 'tcp',
+    port: 1224,
+    host: 'localhost',
+};
 
 function turnoPlugin(options) {
     var turnoLogic;
@@ -14,25 +20,35 @@ function turnoPlugin(options) {
     //Eventos
 
     //Inicialización
-    this.add({ init: turnoPlugin }, init)
+    this.add({
+        init: turnoPlugin
+    }, init)
 
     function tomarTurno(msg, respond) {
-        turnoLogic.tomarTurno(msg.idCliente, msg.idSede, function (err, turno) {
-            var out = { answer: turno }
+        var idClient = msg.idCliente;
+        var idSede =  msg.idSede;
+        turnoLogic.tomarTurno(idClient, idSede, function(err, turno) {
+            var out = {
+                answer: turno
+            }
             respond(null, out)
         });
     }
 
     function cancelarTurno(msg, respond) {
-        turnoLogic.cancelarTurno(msg.idTurno, function (err, ok) {
-            var out = { answer: ok }
+        turnoLogic.cancelarTurno(msg.idTurno, function(err, ok) {
+            var out = {
+                answer: ok
+            }
             respond(null, out)
         });
     }
 
     function consultarTurno(msg, respond) {
-        turnoLogic.consultarPuesto(msg.idTurno, function (err, puesto) {
-            var out = { answer: puesto }
+        turnoLogic.consultarPuesto(msg.idTurno, function(err, puesto) {
+            var out = {
+                answer: puesto
+            }
             respond(null, out)
         });
     }
@@ -48,18 +64,13 @@ function turnoPlugin(options) {
     }
 }
 
-//Mock para el servicio de filas
-var filasClientFactory = function filas() {
-    return {
-        obtenerFilaDisponible: function () {
-            return { id: 1, turnos: [{ id: 1 }, { id: 2 }, { id: 3 }] };
-        }
-    }
-}
-
 var seneca = require('seneca')().use('entity');
 
 seneca
-.use(turnoPlugin, { dbTurno: new turnosRepositoryFactory(seneca) , filasClient: new filasFacadeFactory(seneca), eventClient:new eventBrokerFactory() })
-.listen({ type: 'tcp', port: 1224, host: 'localhost', })
-.act('role:turno, cmd:tomar, idCliente:1,idSede:23', console.log)
+    .use(turnoPlugin, {
+        dbTurno: new turnosRepositoryFactory(),
+        filasClient: new filasFacadeFactory(seneca),
+        eventClient: new eventBrokerFactory()
+    })
+    .listen(comConfig)
+    //.act('role:turno, cmd:tomar, idCliente:1,idSede:sedePrueba', console.log)

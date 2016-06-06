@@ -1,4 +1,4 @@
-﻿var logicaNegocio = function Turno(dbTurno
+var logicaNegocio = function Turno(turnoRepository
     , filasClient, eventClient) {
     
     var estadosTurno = {
@@ -11,7 +11,8 @@
     return {
         tomarTurno: function (idCliente, idSede, fn) {
             filasClient.obtenerFilaDisponible(idSede, function (err, fila) {
-                if (!err) {
+                if (!err && fila) {
+                   
                     var cantidadPersonasFila = fila.turnos.length;
                     var TiempoRestante = cantidadPersonasFila * 10;
                     var turno = {
@@ -22,7 +23,7 @@
                         CodigoPago : idCliente
                     }
                     
-                    turno = dbTurno.create(turno, function (err, turno) {
+                    turno = turnoRepository.create(turno, function (err, turno) {
                         if (!err) {
                             eventClient.emitTurnoAsignadoEvent(turno);
                         }
@@ -36,11 +37,11 @@
             });
         },
         cancelarTurno: function (idTurno, fn) {
-            dbTurno.getTurnoById(idTurno, function (err, turnoACancelar) {
+            turnoRepository.getTurnoById(idTurno, function (err, turnoACancelar) {
                 if (!err && turnoACancelar) {
                     if (turnoACancelar.Estado == estadosTurno.EnEspera.id) {
                         turnoACancelar.Estado = estadosTurno.Cancelado.id;
-                        dbTurno.update(turnoACancelar, function (err, turno) {
+                        turnoRepository.update(turnoACancelar, function (err, turno) {
                             var ok = !err;
                             if (ok) {
                                 eventClient.emitirTurnoCanceladoEvent(turno);
@@ -58,7 +59,7 @@
         },
         consultarPuesto: function (idTurno, fn) {
             //TODO: consultarlo de el servicio de filas, y actualizar el turno en bd
-            dbTurno.getTurnoById(idTurno, function (err, turno) {
+            turnoRepository.getTurnoById(idTurno, function (err, turno) {
                 if (!err && turno) {
                     fn(err, turno.Numero);
                 } else {

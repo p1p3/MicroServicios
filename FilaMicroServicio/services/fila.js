@@ -1,41 +1,48 @@
-﻿var logicaNegocio = function fila(dbFila, eventClient) {
+var logicaNegocio = function fila(filaRepository, eventClient) {
     return {
-        filaDisponible: function (idSede, fn) {
+        filaDisponible: function(idSede, fn) {
             //TODO: Traerlo de base de datos
-         var fila = { id: 1, idCaja: 31, idSede:32, turnos: [{ id: 1 }, { id: 2 }, { id: 3 }] };
-            fn(null, fila);
+            var query = {
+                caja: {
+                    idSede: idSede
+                }
+            };
+            filaRepository.list(query, function(err, filas) {
+                fn(err, filas)
+            });
         },
-        abrirFila: function (caja, fn) {
+        abrirFila: function(caja, fn) {
             var idCaja = caja.id;
-            var idSede = caja.sede.id;
-            this.existeFilaCaja(idCaja, function (err, existe) {
-                if (!error && !existe) {
-                    var caja = null;
-                    var error = null;
-                    
+            this.existeFilaCaja(idCaja, function(err, existe) {
+                if (!err && !existe) {
                     var fila = {
-                        idCaja: idCaja,
-                        idSede: idSede,
-                        turnos: [{ id: 1 }, { id: 2 }, { id: 3 }]
+                        caja: caja,
+                        turnos: []
                     };
 
-                    dbFila.create(fila,function(err,fila){
-                      fn(error, fila);
-                    })
-                    
-                } else {
-                                        fn(err, null);
+                    filaRepository.create(fila, function(err, fila) {
+                        fn(err, fila);
+                    });
+
+                }
+                else {
+                    fn(err, null);
                 }
 
-            })
-        }, existeFilaCaja: function (idCaja, fn) {
+            });
+        },
+        existeFilaCaja: function(idCaja, fn) {
             var err = null;
             var existe = false;
-            fn(err, existe)
+            fn(err, existe);
         },
-        siguienteTurno: function (idFila, fn) {
-            dbFila.findById(idFila, function (err, fila) {
-                fila.turnos.shift();
+        siguienteTurno: function(idFila, fn) {
+            filaRepository.findById(idFila, function(err, fila) {
+                if (fila.turnos.length > 0) {
+                    fila.turnos.shift();
+                    //TODO: lanzar evento siguiente turno
+                }
+
                 var ok = !err;
                 fn(err, ok);
                 if (fila.turnos.length > 0) {
@@ -44,38 +51,53 @@
                 }
 
             });
-        }, tomaTurnoEvento: function (filaId, turnoId, fn) {
-            dbFila.findById(filaId, function (err, fila) {
+        },
+        tomaTurnoEvento: function(filaId, turnoId, fn) {
+            filaRepository.findById(filaId, function(err, fila) {
                 if (!err && fila) {
-                    fila.turnos.push({ id: turnoId });
-                    dbFila.update(fila, function (err, fila) {
+                    var nuevoTurno = {
+                        idTurno: turnoId
+                    };
+
+                    fila.turnos.push(nuevoTurno);
+                    filaRepository.update(fila, function(err, fila) {
                         fn(err, fila);
                     });
-                } else {
+                }
+                else {
                     fn(err, fila);
                 }
             });
         },
-        cancelaTurnoEvento: function (filaId, turnoId, fn) {
-            dbFila.findById(filaId, function (err, fila) {
+        cancelaTurnoEvento: function(filaId, turnoId, fn) {
+            filaRepository.findById(filaId, function(err, fila) {
+                console.log("logica filas");
                 if (!err) {
-                    var turno = fila.turnos.filter(function (turno) {
-                        return turno.id == turnoId;
-                    })
-                    
-                    var index = fila.turnos.indexOf(turno);
-                    if (index > -1) {
-                        fila.turnos.splice(index, 1);
-                    }
-                    
-                    dbFila.update(fila, function (err, fila) {
+
+                    fila.turnos = removerTurnoFila(fila.turnos, turnoId);
+
+                    filaRepository.update(fila, function(err, fila) {
                         fn(err, fila);
                     });
-                } else {
+                }
+                else {
                     fn(err, fila);
                 }
             });
         }
+    }
+
+    function  removerTurnoFila(turnosFila, turnoId) {
+        var filaToReturn = fila;
+
+        for (var i = 0; i < turnosFila.length; i++) {
+            var turno = turnosFila[i];
+            if (turno.idTurno == turnoId) {
+                turnosFila.splice(i, 1);
+            }
+        }
+
+        return filaToReturn;
     }
 }
 
