@@ -32,6 +32,7 @@
   <ItemGroup>
     <Compile Include="app.js" />
     <Compile Include="facades\eventBrokerFacade.js" />
+    <Compile Include="services\fila.js" />
     <Content Include="package.json" />
     <Content Include="README.md" />
   </ItemGroup>
