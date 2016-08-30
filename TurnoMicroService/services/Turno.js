@@ -158,3 +158,4 @@ var logicaNegocio = function Turno(turnoRepository, filasClient, eventClient) {
 }
 
 module.exports = logicaNegocio;
+
